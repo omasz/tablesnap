@@ -33,7 +33,8 @@ def clean_backups(args, log):
         args.name = socket.getfqdn()
 
     try:
-        s3conn = boto.connect_s3(aws_access_key_id=args.key,
+        s3conn = boto.s3.connect_to_region(region_name=args.aws_region,
+                                 aws_access_key_id=args.key,
                                  aws_secret_access_key=args.secret,
                                  security_token=args.token)
         bucket = s3conn.get_bucket(args.bucket)
@@ -163,6 +164,11 @@ def main(log):
     parser.add_argument('--token',
         default=os.environ.get('AWS_SECURITY_TOKEN'),
         help='Amazon S3 Token (default from AWS_SECURITY_TOKEN in environment)')
+    parser.add_argument(
+        '-R',
+        '--aws-region',
+        default='eu-west-1',
+        help='Amazon Region (default eu-west-1)')
     parser.add_argument(
         '-n',
         '--name',

@@ -55,6 +55,7 @@ class DownloadCounter(object):
 class DownloadHandler(object):
     key = None
     secret = None
+    region = None
     token = None
     bucket_name = None
     owner = None
@@ -76,6 +77,7 @@ class DownloadHandler(object):
         self.preserve = args.preserve
         self.key = args.aws_key
         self.secret = args.aws_secret
+        self.region = args.aws_region
         self.token = args.token
         self.bucket_name = args.bucket[0]
         self.num_threads = args.threads
@@ -103,11 +105,13 @@ class DownloadHandler(object):
 #       unsure if boto is thread-safe, will reconnect every time
         log.debug('Connecting to s3')
         if self.token:
-            conn = boto.connect_s3(aws_access_key_id=self.key,
+            conn = boto.s3.connect_to_region(region_name=self.aws_region,
+                                   aws_access_key_id=self.key,
                                    aws_secret_access_key=self.secret,
                                    security_token=self.token)
         else:
-            conn = boto.connect_s3(aws_access_key_id=self.key,
+            conn = boto.s3.connect_to_region(region_name=self.aws_region,
+                                   aws_access_key_id=self.key,
                                    aws_secret_access_key=self.secret,
                                    security_token=self.token)
 
@@ -282,6 +286,9 @@ def main():
     ap.add_argument('--token',
         default=os.environ.get('AWS_SECURITY_TOKEN'),
         help='Amazon S3 Token (default from AWS_SECURITY_TOKEN in environment)')
+    ap.add_argument('-R', '--aws-region',
+        default='eu-west-1',
+        help='Amazon Region (default eu-west-1)')
     ap.add_argument('-p', '--preserve', default=False, action='store_true',
         help='Preserve the permissions (if they exist) from the source. '
         'This overrides -o and -g')
